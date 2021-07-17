@@ -6,10 +6,10 @@ import numpy as np
 import wandb
 from tqdm import tqdm
 
-from mesh_transformer.build_model import build_model
+from mtj.mesh_transformer.build_model import build_model
 from lm_eval import evaluator, tasks
-from tasks.eval_harness import EvalHarnessAdaptor
-from tfrecord_loader import TFRecordNewInputs
+from mtj.tasks.eval_harness import EvalHarnessAdaptor
+from mtj.tfrecord_loader import TFRecordNewInputs
 import multiprocessing
 
 
