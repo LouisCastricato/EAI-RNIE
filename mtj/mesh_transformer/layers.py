@@ -195,6 +195,7 @@ class TransformerLayerShard(hk.Module):
         shards = config["cores_per_replica"]
         norm = getnorm(config["norm"])
         self.is_rotary = config["pe"] == "rotary"
+        self.is_glm = config["model_type"] == "glm"
 
         assert dim % heads == 0
         assert heads % shards == 0
@@ -257,15 +258,16 @@ class TransformerLayerShard(hk.Module):
 
         return q, v, k
 
-    def __call__(self, x, attn_bias):
+    def __call__(self, x, attn_bias, causal=True):
         x = f_psum(x)
         x = self.norm(x)
 
         q, v, k = self.qvk_proj(x)
 
         seq_len = x.shape[0]
-        causal_mask = np.tril(np.ones((seq_len, seq_len)))
-        bias = -1e10 * (1. - causal_mask)
+        if causal:
+            causal_mask = np.tril(np.ones((seq_len, seq_len)))
+            bias = -1e10 * (1. - causal_mask)
         bias += attn_bias
 
         attn_out = self.self_attn(q, v, k, bias)
